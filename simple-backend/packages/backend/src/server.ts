@@ -20,6 +20,7 @@ import { ApolloContext, createContext, dataLoaders } from './lib/context';
 import { NodeEnv } from './lib/enums';
 import { apolloComplexityPlugin } from './lib/plugins/complexity';
 import { apolloSentryPlugin } from './lib/plugins/sentry';
+import { connectToDatabase, disconnectFromDatabase } from './prisma';
 import { resolvers } from './resolvers';
 
 const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
@@ -93,7 +94,10 @@ export async function startServer(server: ApolloServer) {
   await server.start();
   server.applyMiddleware({ app });
 
-  httpServer.listen({ port: 4000 }, () => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  httpServer.listen({ port: 4000 }, async () => {
+    await connectToDatabase();
+
     // eslint-disable-next-line no-console
     console.log(`Server ready at http://localhost:4000${server.graphqlPath}`);
   });
@@ -111,4 +115,6 @@ export const startTestServer = async (server: ApolloServer) => {
 
 export const stopTestServer = async (server: ApolloServer) => {
   await server.stop();
+
+  await disconnectFromDatabase();
 };
