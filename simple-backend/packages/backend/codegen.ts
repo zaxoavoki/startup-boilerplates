@@ -6,11 +6,9 @@ const config: CodegenConfig = {
   generates: {
     'generated/graphql.ts': {
       config: {
-        contextType: '../server/lib/context#ApolloContext',
+        contextType: '../src/lib/context#ApolloContext',
         mappers: {
           User: '.prisma/client#User as UserType',
-          Post: '.prisma/client#Post as PostType',
-          Comment: '.prisma/client#Comment as CommentType',
         },
         scalars: {
           DateTime: 'Date',
