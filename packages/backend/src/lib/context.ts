@@ -1,5 +1,5 @@
+import { ExpressContextFunctionArgument } from '@apollo/server/express4';
 import { User } from '@prisma/client';
-import { ExpressContext } from 'apollo-server-express';
 import { auth } from 'firebase-admin';
 
 import { authMiddleware } from '../middlewares/auth';
@@ -14,11 +14,13 @@ export type ApolloContext = (
   dataLoaders: Record<string, unknown>;
 };
 
-export const dataLoaders = {} as ApolloContext['dataLoaders'];
+export const dataLoaders = {
+  // Here we can add data loaders
+} as ApolloContext['dataLoaders'];
 
-export const createContext = async ({
-  req,
-}: ExpressContext): Promise<ApolloContext> => {
-  const { user, userProfile } = await authMiddleware({ req });
+export const createContext = async (
+  args: ExpressContextFunctionArgument,
+): Promise<ApolloContext> => {
+  const { user, userProfile } = await authMiddleware(args);
   return { user, userProfile, dataLoaders } as ApolloContext;
 };

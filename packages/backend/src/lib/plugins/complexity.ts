@@ -1,6 +1,5 @@
-import { ValidationError } from 'apollo-server';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { GraphQLSchema } from 'graphql';
+import { ApolloServerPlugin } from '@apollo/server';
+import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
   directiveEstimator,
   fieldExtensionsEstimator,
@@ -34,7 +33,7 @@ export const apolloComplexityPlugin: (
           });
 
           if (complexity > MAX_QUERY_COMPLEXITY) {
-            throw new ValidationError(
+            throw new GraphQLError(
               `Too complicated query! ${complexity} is over ${MAX_QUERY_COMPLEXITY} that is the max allowed complexity.`,
             );
           }

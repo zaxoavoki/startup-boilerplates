@@ -1,9 +1,8 @@
-import * as Sentry from '@sentry/node';
-import { ApolloError } from 'apollo-server';
 import {
   ApolloServerPlugin,
   GraphQLRequestContextDidEncounterErrors,
-} from 'apollo-server-plugin-base';
+} from '@apollo/server';
+import * as Sentry from '@sentry/node';
 import { GraphQLError } from 'graphql';
 
 import { ApolloContext } from '../context';
@@ -37,10 +36,7 @@ export const apolloSentryPlugin: ApolloServerPlugin = {
         }
 
         for (const err of ctx.errors) {
-          if (
-            err.originalError instanceof ApolloError ||
-            err.originalError instanceof GraphQLError
-          ) {
+          if (err.originalError instanceof GraphQLError) {
             continue;
           }
 

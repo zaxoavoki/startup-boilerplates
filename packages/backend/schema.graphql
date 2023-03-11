@@ -53,11 +53,9 @@ input UpdateUserInput {
   city: String
   avatarUrl: String
   instagram: String
-  interests: [String!]
   twitter: String
   website: String
   bio: String
-  searchSettings: SearchSettingsInput
 }
 
 input CreateUserInput {
@@ -70,11 +68,9 @@ input CreateUserInput {
   city: String
   avatarUrl: String
   instagram: String
-  interests: [String!]
   twitter: String
   website: String
   bio: String
-  searchSettings: SearchSettingsInput
 }
 
 type Query @rateLimit(limit: 100, duration: 15) {

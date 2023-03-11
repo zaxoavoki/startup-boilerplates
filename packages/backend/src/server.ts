@@ -1,12 +1,12 @@
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { loadTypedefsSync } from '@graphql-tools/load';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import {
-  ApolloServerPluginLandingPageLocalDefault,
-  ContextFunction,
-} from 'apollo-server-core';
-import { ApolloServer, ExpressContext } from 'apollo-server-express';
-import responseCachePlugin from 'apollo-server-plugin-response-cache';
+import { json } from 'body-parser';
+import cors from 'cors';
 import express from 'express';
 import { DocumentNode } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
@@ -14,9 +14,9 @@ import {
   rateLimitDirective,
   defaultPointsCalculator,
 } from 'graphql-rate-limit-directive';
-import { Server } from 'http';
+import http from 'http';
 
-import { ApolloContext, createContext, dataLoaders } from './lib/context';
+import { ApolloContext, createContext } from './lib/context';
 import { NodeEnv } from './lib/enums';
 import { apolloComplexityPlugin } from './lib/plugins/complexity';
 import { apolloSentryPlugin } from './lib/plugins/sentry';
@@ -49,71 +49,55 @@ const schema = rateLimitDirectiveTransformer(
   }),
 );
 
-const createApolloServer = (
-  {
-    context,
-  }: {
-    context: ApolloContext | ContextFunction<ExpressContext, ApolloContext>;
-  } = {
-    context: createContext,
-  },
-) => {
-  return new ApolloServer<ExpressContext | Partial<ApolloContext>>({
+export const createServer = () => {
+  const app = express();
+  const httpServer = http.createServer(app);
+
+  const apolloServer = new ApolloServer<ApolloContext>({
     schema,
-    context,
     introspection: true,
     csrfPrevention: true,
-    debug: process.env.NODE_ENV === NodeEnv.Dev,
+    includeStacktraceInErrorResponses: process.env.NODE_ENV === NodeEnv.Dev,
+    nodeEnv: process.env.NODE_ENV,
     plugins: [
-      ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+      ApolloServerPluginDrainHttpServer({ httpServer }),
       responseCachePlugin(),
       apolloComplexityPlugin(schema),
       apolloSentryPlugin,
     ],
     validationRules: [depthLimit(10)],
   });
-};
-
-export const createServer = () => {
-  const server = createApolloServer({
-    context: ctx => {
-      return {
-        user: null,
-        userProfile: null,
-        dataLoaders,
-        ...ctx,
-      };
-    },
-  });
-
-  const app = express();
-  let expressServer: Server | null = null;
 
   const startServer = async (port: number) => {
-    await server.start();
-    server.applyMiddleware({ app });
+    await apolloServer.start();
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises -- it's ok
-    expressServer = app.listen({ port }, async () => {
-      await connectToDatabase();
+    app.use(
+      '/graphql',
+      cors<cors.CorsRequest>(),
+      json(),
+      expressMiddleware(apolloServer, {
+        context: createContext,
+      }),
+    );
 
-      if (process.env.NODE_ENV !== NodeEnv.Testing) {
-        // eslint-disable-next-line no-console -- start info
-        console.log(
-          `Server ready at http://localhost:${port}${server.graphqlPath}`,
-        );
-      }
-    });
+    await new Promise<void>(resolve => httpServer.listen({ port }, resolve));
+
+    await connectToDatabase();
+
+    if (process.env.NODE_ENV !== NodeEnv.Testing) {
+      // eslint-disable-next-line no-console -- start info
+      console.log(`Server ready at http://localhost:${port}/graphql`);
+    }
   };
 
   const stopServer = async () => {
-    await server.stop();
+    await apolloServer.stop();
     await disconnectFromDatabase();
-    expressServer?.close();
+    httpServer.close();
   };
 
   return {
-    server,
+    apolloServer,
     startServer,
     stopServer,
   };

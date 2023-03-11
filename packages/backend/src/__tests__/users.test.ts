@@ -1,11 +1,13 @@
-import { gql } from 'apollo-server';
-import type { UserRecord } from 'firebase-admin/lib/auth/user-record';
+import type { User } from '@prisma/client';
+import assert from 'assert';
+import gql from 'graphql-tag';
 
+import type { ApolloContext } from '../lib/context';
 import { prisma } from '../prisma';
 import { createUser } from '../seeds/users';
 import { createServer } from '../server';
 
-const { server, startServer, stopServer } = createServer();
+const { apolloServer, startServer, stopServer } = createServer();
 
 beforeAll(() => startServer(0));
 afterEach(() => prisma.user.deleteMany());
@@ -25,7 +27,9 @@ describe('Manage users', () => {
   it('should be able to update user with basic fields', async () => {
     const user = await createUser();
 
-    const { data, errors } = await server.executeOperation(
+    const { body } = await apolloServer.executeOperation<{
+      updateUser: User;
+    }>(
       {
         query: UpdateUserDocument,
         variables: {
@@ -35,10 +39,11 @@ describe('Manage users', () => {
           },
         },
       },
-      {
-        userProfile: user,
-      },
+      { contextValue: { userProfile: user } as ApolloContext },
     );
+
+    assert(body.kind === 'single');
+    const { data, errors } = body.singleResult;
 
     expect(errors).toBeUndefined();
     expect(data).toMatchObject({
@@ -62,7 +67,7 @@ describe('Manage users', () => {
   it('should throw an error on too long firstName', async () => {
     const user = await createUser();
 
-    const { data, errors } = await server.executeOperation(
+    const { body } = await apolloServer.executeOperation(
       {
         query: UpdateUserDocument,
         variables: {
@@ -72,10 +77,11 @@ describe('Manage users', () => {
           },
         },
       },
-      {
-        userProfile: user,
-      },
+      { contextValue: { userProfile: user } as ApolloContext },
     );
+
+    assert(body.kind === 'single');
+    const { data, errors } = body.singleResult;
 
     expect(errors).toBeDefined();
     expect(JSON.stringify(errors)).toContain(
@@ -94,7 +100,7 @@ describe('Manage users', () => {
   });
 
   it('should be able to create a user', async () => {
-    const { data, errors } = await server.executeOperation(
+    const { body } = await apolloServer.executeOperation(
       {
         query: gql`
           mutation CreateUser($input: CreateUserInput!) {
@@ -112,8 +118,11 @@ describe('Manage users', () => {
           },
         },
       },
-      { user: { uid: '123' } as UserRecord },
+      { contextValue: { user: { uid: '123' } } as ApolloContext },
     );
+
+    assert(body.kind === 'single');
+    const { data, errors } = body.singleResult;
 
     expect(errors).toBeUndefined();
     expect(data).toMatchObject({
@@ -127,7 +136,7 @@ describe('Manage users', () => {
   it('should get an error when creating a user with an existing phone', async () => {
     await createUser({ phone: '+1234567890', firebaseId: '123' });
 
-    const { data, errors } = await server.executeOperation(
+    const { body } = await apolloServer.executeOperation(
       {
         query: gql`
           mutation CreateUser($input: CreateUserInput!) {
@@ -145,8 +154,11 @@ describe('Manage users', () => {
           },
         },
       },
-      { user: { uid: '456' } as UserRecord },
+      { contextValue: { user: { uid: '456' } } as ApolloContext },
     );
+
+    assert(body.kind === 'single');
+    const { data, errors } = body.singleResult;
 
     expect(errors).toBeDefined();
     expect(errors?.[0].message).toContain('User already exists');

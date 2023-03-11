@@ -39,7 +39,6 @@ export const createUser = async (
       ...validated.data,
       phone: validated.data.phone,
       firebaseId: user.uid,
-      searchSettings: input.searchSettings ? input.searchSettings : {},
     },
   });
 };
