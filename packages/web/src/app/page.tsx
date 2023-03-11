@@ -1,12 +1,7 @@
-'use client';
-
-import { Button } from '@mantine/core';
 import React from 'react';
 
-export default function Home() {
-  return (
-    <main>
-      <Button>jiuji</Button>
-    </main>
-  );
+import { Test } from './test-component';
+
+export default function Page() {
+  return <Test />;
 }

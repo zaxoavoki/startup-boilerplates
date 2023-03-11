@@ -9,7 +9,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...(headers as Record<string, string>),
-      authorization: `Bearer ${''}`,
+      authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
     },
   };
 });
