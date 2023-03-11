@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String?
+  lastName       String?
+  sex            String?
+  dateOfBirth    DateTime?
+  phone          String         @unique
+  country        String?
+  firebaseId     String         @unique
+  inactive       Boolean        @default(false)
+  onboarded      Boolean        @default(false)
+  city           String?
+  avatarUrl      String?
+  instagram      String?
+  twitter        String?
+  website        String?
+  bio            String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}

@@ -1,0 +1,88 @@
+scalar Date
+
+directive @complexity(value: Int!, multipliers: [String!]) on FIELD_DEFINITION
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+  inheritMaxAge: Boolean
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+enum Sex {
+  Male
+  Female
+  Other
+}
+
+type User {
+  avatarUrl: String
+  bio: String
+  city: String
+  country: String
+  createdAt: Date!
+  dateOfBirth: Date
+  firebaseId: String!
+  firstName: String
+  id: String!
+  inactive: Boolean!
+  instagram: String
+  lastName: String
+  onboarded: Boolean!
+  phone: String!
+  sex: Sex
+  twitter: String
+  updatedAt: Date!
+  website: String
+}
+
+input GetUserInput {
+  id: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  sex: Sex
+  dateOfBirth: Date
+  country: String
+  city: String
+  avatarUrl: String
+  instagram: String
+  interests: [String!]
+  twitter: String
+  website: String
+  bio: String
+  searchSettings: SearchSettingsInput
+}
+
+input CreateUserInput {
+  phone: String!
+  firstName: String
+  lastName: String
+  sex: Sex
+  dateOfBirth: Date
+  country: String
+  city: String
+  avatarUrl: String
+  instagram: String
+  interests: [String!]
+  twitter: String
+  website: String
+  bio: String
+  searchSettings: SearchSettingsInput
+}
+
+type Query @rateLimit(limit: 100, duration: 15) {
+  getUser(input: GetUserInput!): User!
+}
+
+type Mutation @rateLimit(limit: 100, duration: 15) {
+  createUser(input: CreateUserInput!): User
+  updateUser(input: UpdateUserInput!): User
+  deleteUser: Boolean
+}

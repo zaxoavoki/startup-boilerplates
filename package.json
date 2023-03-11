@@ -1,0 +1,17 @@
+{
+  "name": "simple-backend",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "devDependencies": {
+    "@nrwl/nx-cloud": "15.0.3",
+    "nx": "15.7.1",
+    "prettier": "2.8.4",
+    "eslint": "8.34.0",
+    "eslint-config-vazco": "7.1.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
