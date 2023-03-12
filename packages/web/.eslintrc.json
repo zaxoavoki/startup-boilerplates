@@ -1,3 +1,8 @@
 {
-  "extends": ["next/core-web-vitals", "vazco/typescript"]
+  "extends": ["next/core-web-vitals", "vazco/typescript"],
+  "ignorePatterns": [
+    "sentry.client.config.js",
+    "sentry.server.config.js",
+    "sentry.edge.config.js"
+  ]
 }

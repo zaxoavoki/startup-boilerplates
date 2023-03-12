@@ -36,6 +36,7 @@
     "@mantine/core": "6.0.1",
     "@mantine/hooks": "6.0.1",
     "@mantine/next": "6.0.1",
+    "@sentry/nextjs": "7.42.0",
     "firebase": "9.17.2",
     "graphql": "16.6.0",
     "next": "13.2.4",
