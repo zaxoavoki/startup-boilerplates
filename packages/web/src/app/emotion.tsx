@@ -1,6 +1,6 @@
 'use client';
 
-import { client } from '@/apollo';
+import { client } from '@/lib/apollo';
 import { ApolloProvider } from '@apollo/client';
 import { CacheProvider } from '@emotion/react';
 import { useEmotionCache, MantineProvider } from '@mantine/core';
