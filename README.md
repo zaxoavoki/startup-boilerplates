@@ -3,7 +3,7 @@
 I'm tired of doing the same thing over and over again. That's why I decided to archieve here all
 project templates I'm actively using.
 
-- backend:
+## Backend
 
   This project is built with `nx` package. It contains `backend` package, which is literally the whole backend
   which uses the most popular tools nowadays, such as:
@@ -17,7 +17,16 @@ project templates I'm actively using.
   
   But if you don't really need `nx` or don't like it, there is no problem separating the `backend` package.
 
-- frontend:
+  ### Structure
+
+  - `lib` folder contains all the code which is used by the `backend` package. It's a good practice to separate
+    the code which is used by the package and the code which is used by the whole project.
+  - `middlewares` folder contains all the Express middlewares.
+  - `resolvers` folder contains all the GraphQL resolvers.
+  - `prisma` folder contains all the Prisma related files, such as `schema.prisma`, seeders and migrations.
+  - `services` folder contains all the services which are used by the resolvers.
+
+## Frontend
 
   Project contains `web` package, which is literally the whole frontend
   which uses the most popular tools nowadays, such as:
@@ -31,6 +40,11 @@ project templates I'm actively using.
   - Firebase
   
   You can separate the `web` package if you don't like `nx` or don't need it as well.
+
+  ### Structure
+
+  `web` package has the default Next.js structure of version 13.
+
 
 In the future, I'm also planning to add more templates connected to frontend and mobile apps.
 
